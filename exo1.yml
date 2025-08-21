@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Ping API
+  version: 1.0.0
+  description: OpenApi Specification STD24057.
+
+paths:
+  /ping:
+    get:
+      summary: Vérifie la disponibilité du serveur
+      description: Retourne "pong" si l'API fonctionne correctement.
+      responses:
+        '200':
+          description: Réponse réussie
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
+        '500':
+          description: Erreur interne du serveur
