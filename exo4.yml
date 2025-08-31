@@ -1,0 +1,72 @@
+openapi: 3.1.0
+info:
+  title: Product API
+  description: API de recherche de produits
+  version: 1.0.0
+servers:
+  - url: "https://localhost:8080"
+
+paths:
+  /products:
+    get:
+      summary: "Recherche de produits"
+      parameters:
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/QParam"
+      responses:
+        "200":
+          description: "Liste des produits trouvés"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+              examples:
+                multipleProducts:
+                  summary: "Résultat avec plusieurs produits"
+                  value:
+                    - name: "Yaourt nature"
+                      expiration_datetime: "2025-09-15T12:00:00Z"
+                      price: 2.5
+                    - name: "Chocolat noir"
+                      expiration_datetime: "2026-01-01T00:00:00Z"
+                      price: 3.99
+                emptyList:
+                  summary: "Aucun produit trouvé"
+                  value: []
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Pomme"
+        expiration_datetime:
+          type: string
+          format: date-time
+          example: "2025-12-31T23:59:59Z"
+        price:
+          type: number
+          format: float
+          example: 1.99
+
+  parameters:
+    LimitParam:
+      name: limit
+      in: query
+      description: "Nombre maximum de produits à retourner"
+      required: false
+      schema:
+        type: integer
+        example: 10
+    QParam:
+      name: q
+      in: query
+      description: "Terme de recherche"
+      required: false
+      schema:
+        type: string
+        example: "chocolat"
