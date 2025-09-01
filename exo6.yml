@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: User Profile API
+  description: API de gestion des profils utilisateurs avec sous-schemas
+  version: 1.0.0
+servers:
+  - url: "https://localhost:8080"
+
+paths:
+  /users/{id}:
+    get:
+      summary: "Récupérer un utilisateur par son ID"
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: "Utilisateur trouvé"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+              example:
+                identifier: "USR123"
+                personalInfo:
+                  first_name: "Alice"
+                  last_name: "Martin"
+                  birthdate: "2000-01-01"
+                  email: "alice@example.com"
+                address:
+                  address_street: "Rue principale"
+                  address_city: "Antananarivo"
+                  address_country: "Madagascar"
+                  address_postal_code: "101"
+                preferences:
+                  needs_newsletter: true
+                  language: "fr"
+        "404":
+          description: "Utilisateur non trouvé"
+
+  /users:
+    post:
+      summary: "Créer des utilisateurs"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/CreateUserProfile"
+            example:
+              - personalInfo:
+                  first_name: "Bob"
+                  last_name: "Rakoto"
+                  birthdate: "1995-05-10"
+                  email: "bob@example.com"
+                address:
+                  address_street: "Lot II"
+                  address_city: "Fianarantsoa"
+                  address_country: "Madagascar"
+                  address_postal_code: "301"
+                preferences:
+                  needs_newsletter: false
+                  language: "mg"
+      responses:
+        "201":
+          description: "Utilisateurs créés"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+
+  /users/{id}/personalInfo:
+    put:
+      summary: "Mettre à jour les informations personnelles"
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalInfo"
+            example:
+              first_name: "Alicia"
+              last_name: "Randria"
+              birthdate: "1999-12-12"
+              email: "alicia@example.com"
+      responses:
+        "200":
+          description: "Infos personnelles mises à jour"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/{id}/address:
+    put:
+      summary: "Mettre à jour l’adresse"
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Address"
+            example:
+              address_street: "Rue Ambanidia"
+              address_city: "Antananarivo"
+              address_country: "Madagascar"
+              address_postal_code: "101"
+      responses:
+        "200":
+          description: "Adresse mise à jour"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/{id}/preferences:
+    put:
+      summary: "Mettre à jour les préférences"
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Preferences"
+            example:
+              needs_newsletter: true
+              language: "eng"
+      responses:
+        "200":
+          description: "Préférences mises à jour"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+components:
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: "Identifiant unique de l’utilisateur"
+      schema:
+        type: string
+        example: "USR123"
+
+  schemas:
+    UserProfile:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/CreateUserProfile"
+        - type: object
+          properties:
+            identifier:
+              type: string
+              example: "USR123"
+
+    CreateUserProfile:
+      type: object
+      properties:
+        personalInfo:
+          $ref: "#/components/schemas/PersonalInfo"
+        address:
+          $ref: "#/components/schemas/Address"
+        preferences:
+          $ref: "#/components/schemas/Preferences"
+
+    PersonalInfo:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        birthdate:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+
+    Address:
+      type: object
+      properties:
+        address_street:
+          type: string
+        address_city:
+          type: string
+        address_country:
+          type: string
+        address_postal_code:
+          type: string
+
+    Preferences:
+      type: object
+      properties:
+        needs_newsletter:
+          type: boolean
+        language:
+          type: string
+          enum: [mg, fr, eng]

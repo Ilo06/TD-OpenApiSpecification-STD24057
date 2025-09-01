@@ -1,0 +1,165 @@
+openapi: 3.1.0
+info:
+  title: Product & Order API
+  description: API de gestion de produits et commandes avec authentification
+  version: 1.0.0
+servers:
+  - url: "https://localhost:8080"
+
+tags:
+  - name: Products
+    description: "Opérations liées aux produits"
+  - name: Orders
+    description: "Opérations liées aux commandes"
+
+paths:
+  /products:
+    get:
+      tags: [ Products ]
+      summary: "Recherche de produits"
+      parameters:
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/QParam"
+      responses:
+        "200":
+          description: "Liste des produits trouvés"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+              examples:
+                multipleProducts:
+                  summary: "Résultat avec plusieurs produits"
+                  value:
+                    - name: "Yaourt nature"
+                      expiration_datetime: "2025-09-15T12:00:00Z"
+                      price: 2.5
+                    - name: "Chocolat noir"
+                      expiration_datetime: "2026-01-01T00:00:00Z"
+                      price: 3.99
+                emptyList:
+                  summary: "Aucun produit trouvé"
+                  value: [ ]
+
+  /orders:
+    get:
+      tags: [ Orders ]
+      summary: "Lister les commandes"
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: "Liste des commandes paginée"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+              example:
+                - identifier: 1
+                  customer_name: "Alice"
+                  creation_datetime: "2025-09-01T09:00:00Z"
+                  total_amount: 59.9
+                - identifier: 2
+                  customer_name: "Bob"
+                  creation_datetime: "2025-09-01T10:30:00Z"
+                  total_amount: 120.0
+
+    post:
+      tags: [ Orders ]
+      summary: "Créer une commande"
+      security:
+        - basicAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+            example:
+              customer_name: "Charlie"
+              creation_datetime: "2025-09-01T11:00:00Z"
+              total_amount: 45.5
+      responses:
+        "201":
+          description: "Commande créée avec succès"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+              example:
+                identifier: 3
+                customer_name: "Charlie"
+                creation_datetime: "2025-09-01T11:00:00Z"
+                total_amount: 45.5
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+        expiration_datetime:
+          type: string
+          format: date-time
+        price:
+          type: number
+          format: float
+
+    Order:
+      type: object
+      properties:
+        identifier:
+          type: integer
+        customer_name:
+          type: string
+        creation_datetime:
+          type: string
+          format: date-time
+        total_amount:
+          type: number
+          format: float
+
+  parameters:
+    LimitParam:
+      name: limit
+      in: query
+      description: "Nombre maximum de produits à retourner"
+      required: false
+      schema:
+        type: integer
+        example: 10
+    QParam:
+      name: q
+      in: query
+      description: "Terme de recherche"
+      required: false
+      schema:
+        type: string
+        example: "chocolat"
+    PageParam:
+      name: page
+      in: query
+      description: "Numéro de page"
+      required: false
+      schema:
+        type: integer
+        example: 1
+    SizeParam:
+      name: size
+      in: query
+      description: "Taille de page"
+      required: false
+      schema:
+        type: integer
+        example: 20
